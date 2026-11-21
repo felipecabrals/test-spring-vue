@@ -6,6 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import com.nexdom.test_spring_vue.dto.LucroProdutoResponse;
 import com.nexdom.test_spring_vue.dto.ProdutoPorTipoResponse;
 import com.nexdom.test_spring_vue.dto.ProdutoRequest;
 import com.nexdom.test_spring_vue.dto.ProdutoResponse;
@@ -74,5 +75,10 @@ public class ProdutoService {
     @Transactional(readOnly = true)
     public List<ProdutoPorTipoResponse> consultarPorTipo(TipoProduto tipo) {
         return repository.consultarPorTipo(tipo);
+    }
+
+    @Transactional(readOnly = true)
+    public List<LucroProdutoResponse> consultarLucro() {
+        return repository.consultarLucro();
     }
 }

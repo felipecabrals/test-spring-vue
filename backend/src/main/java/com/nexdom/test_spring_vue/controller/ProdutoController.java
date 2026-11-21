@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.nexdom.test_spring_vue.dto.LucroProdutoResponse;
 import com.nexdom.test_spring_vue.dto.ProdutoPorTipoResponse;
 import com.nexdom.test_spring_vue.dto.ProdutoRequest;
 import com.nexdom.test_spring_vue.dto.ProdutoResponse;
@@ -65,5 +66,10 @@ public class ProdutoController {
     @GetMapping("/por-tipo")
     public List<ProdutoPorTipoResponse> consultarPorTipo(@RequestParam TipoProduto tipo) {
         return service.consultarPorTipo(tipo);
+    }
+
+    @GetMapping("/lucro")
+    public List<LucroProdutoResponse> consultarLucro() {
+        return service.consultarLucro();
     }
 }

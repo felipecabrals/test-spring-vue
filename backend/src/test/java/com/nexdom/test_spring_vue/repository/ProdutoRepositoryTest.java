@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.nexdom.test_spring_vue.dto.LucroProdutoResponse;
 import com.nexdom.test_spring_vue.dto.ProdutoPorTipoResponse;
 import com.nexdom.test_spring_vue.model.MovimentoEstoque;
 import com.nexdom.test_spring_vue.model.Produto;
@@ -70,5 +71,30 @@ public class ProdutoRepositoryTest {
                 .custoUnitario(produto.getValorFornecedor())
                 .dataMovimentacao(LocalDateTime.now())
                 .build();
+    }
+
+    @Test
+    void deveCalcularLucroSomandoApenasSaidas() {
+        Produto notebook = salvarProduto("P001", "Notebook", TipoProduto.ELETRONICO, 7);
+        movimentoRepository.save(movimento(notebook, TipoMovimentacao.ENTRADA, 10));
+        movimentoRepository.save(movimento(notebook, TipoMovimentacao.SAIDA, 3));
+        movimentoRepository.save(movimento(notebook, TipoMovimentacao.SAIDA, 2));
+
+        List<LucroProdutoResponse> resultado = produtoRepository.consultarLucro();
+
+        assertThat(resultado).hasSize(1);
+        assertThat(resultado.get(0).quantidadeTotalSaida()).isEqualTo(5L);
+        assertThat(resultado.get(0).lucroTotal()).isEqualByComparingTo("2500.00");
+    }
+
+    @Test
+    void produtoSemSaidaDeveTerLucroZero() {
+        salvarProduto("P003", "Sofa", TipoProduto.MOVEL, 2);
+
+        List<LucroProdutoResponse> resultado = produtoRepository.consultarLucro();
+
+        assertThat(resultado).hasSize(1);
+        assertThat(resultado.get(0).quantidadeTotalSaida()).isZero();
+        assertThat(resultado.get(0).lucroTotal()).isEqualByComparingTo("0");
     }
 }
