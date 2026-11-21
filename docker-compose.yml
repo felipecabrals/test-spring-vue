@@ -3,3 +3,14 @@ services:
     build: ./backend
     ports:
       - "8080:8080"
+  tests:
+    image: maven:3.9-eclipse-temurin-21
+    working_dir: /app
+    volumes:
+      - ./backend:/app
+      - maven-repo:/root/.m2
+    command: mvn test -B
+    profiles: ["test"]
+
+volumes:
+  maven-repo:

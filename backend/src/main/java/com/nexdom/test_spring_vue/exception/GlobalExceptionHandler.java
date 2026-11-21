@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -46,5 +47,22 @@ public class GlobalExceptionHandler {
             HttpServletRequest request) {
         return ResponseEntity.status(status)
                 .body(ApiError.of(status, message, request.getRequestURI()));
+    }
+
+    @ExceptionHandler({ EstoqueInsuficienteException.class, RegraNegocioException.class })
+    public ResponseEntity<ApiError> handleRegraNegocio(RuntimeException ex, HttpServletRequest request) {
+        return build(HttpStatus.UNPROCESSABLE_ENTITY, ex.getMessage(), request);
+    }
+
+    @ExceptionHandler(ProdutoComMovimentacaoException.class)
+    public ResponseEntity<ApiError> handleProdutoComMovimentacao(ProdutoComMovimentacaoException ex,
+            HttpServletRequest request) {
+        return build(HttpStatus.CONFLICT, ex.getMessage(), request);
+    }
+
+    @ExceptionHandler(ObjectOptimisticLockingFailureException.class)
+    public ResponseEntity<ApiError> handleConcorrencia(HttpServletRequest request) {
+        return build(HttpStatus.CONFLICT,
+                "O produto foi alterado por outra operação. Tente novamente.", request);
     }
 }

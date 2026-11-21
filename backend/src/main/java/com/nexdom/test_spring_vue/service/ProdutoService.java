@@ -7,9 +7,11 @@ import org.springframework.stereotype.Service;
 import com.nexdom.test_spring_vue.dto.ProdutoRequest;
 import com.nexdom.test_spring_vue.dto.ProdutoResponse;
 import com.nexdom.test_spring_vue.exception.CodigoDuplicadoException;
+import com.nexdom.test_spring_vue.exception.ProdutoComMovimentacaoException;
 import com.nexdom.test_spring_vue.exception.ProdutoNaoEncontradoException;
 import com.nexdom.test_spring_vue.mapper.ProdutoMapper;
 import com.nexdom.test_spring_vue.model.Produto;
+import com.nexdom.test_spring_vue.repository.MovimentoEstoqueRepository;
 import com.nexdom.test_spring_vue.repository.ProdutoRepository;
 
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +21,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class ProdutoService {
     private final ProdutoRepository repository;
+    private final MovimentoEstoqueRepository movimentoRepository;
     private final ProdutoMapper mapper;
 
     @Transactional
@@ -52,7 +55,11 @@ public class ProdutoService {
 
     @Transactional
     public void excluir(Long id) {
-        repository.delete(buscarEntidade(id));
+        Produto produto = buscarEntidade(id);
+        if (movimentoRepository.existsByProdutoId(id)) { // novo
+            throw new ProdutoComMovimentacaoException(id); // novo
+        }
+        repository.delete(produto);
     }
 
     private Produto buscarEntidade(Long id) {

@@ -9,6 +9,8 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 
+import com.nexdom.test_spring_vue.exception.EstoqueInsuficienteException;
+
 @Entity
 @Table(name = "produto")
 @Getter
@@ -40,4 +42,15 @@ public class Produto {
 
     @Version
     private Long versao;
+
+    public void entrada(int quantidade) {
+        this.quantidadeEstoque += quantidade;
+    }
+
+    public void saida(int quantidade) {
+        if (this.quantidadeEstoque < quantidade) {
+            throw new EstoqueInsuficienteException(codigo, quantidadeEstoque, quantidade);
+        }
+        this.quantidadeEstoque -= quantidade;
+    }
 }
