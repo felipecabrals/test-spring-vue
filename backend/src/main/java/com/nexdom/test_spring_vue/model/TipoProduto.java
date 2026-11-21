@@ -5,5 +5,7 @@ public enum TipoProduto {
     ROUPA,
     ALIMENTO,
     LIVRO,
-    MOVEIS
+    MOVEIS,
+    ELETRODOMESTICO,
+    MOVEL
 }

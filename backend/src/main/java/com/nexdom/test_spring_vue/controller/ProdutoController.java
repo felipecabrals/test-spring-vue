@@ -1,6 +1,7 @@
 package com.nexdom.test_spring_vue.controller;
 
 import java.net.URI;
+import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -13,11 +14,14 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.nexdom.test_spring_vue.dto.ProdutoPorTipoResponse;
 import com.nexdom.test_spring_vue.dto.ProdutoRequest;
 import com.nexdom.test_spring_vue.dto.ProdutoResponse;
+import com.nexdom.test_spring_vue.model.TipoProduto;
 import com.nexdom.test_spring_vue.service.ProdutoService;
 
 import jakarta.validation.Valid;
@@ -56,5 +60,10 @@ public class ProdutoController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void excluir(@PathVariable Long id) {
         service.excluir(id);
+    }
+
+    @GetMapping("/por-tipo")
+    public List<ProdutoPorTipoResponse> consultarPorTipo(@RequestParam TipoProduto tipo) {
+        return service.consultarPorTipo(tipo);
     }
 }

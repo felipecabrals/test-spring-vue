@@ -1,9 +1,12 @@
 package com.nexdom.test_spring_vue.service;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import com.nexdom.test_spring_vue.dto.ProdutoPorTipoResponse;
 import com.nexdom.test_spring_vue.dto.ProdutoRequest;
 import com.nexdom.test_spring_vue.dto.ProdutoResponse;
 import com.nexdom.test_spring_vue.exception.CodigoDuplicadoException;
@@ -11,6 +14,7 @@ import com.nexdom.test_spring_vue.exception.ProdutoComMovimentacaoException;
 import com.nexdom.test_spring_vue.exception.ProdutoNaoEncontradoException;
 import com.nexdom.test_spring_vue.mapper.ProdutoMapper;
 import com.nexdom.test_spring_vue.model.Produto;
+import com.nexdom.test_spring_vue.model.TipoProduto;
 import com.nexdom.test_spring_vue.repository.MovimentoEstoqueRepository;
 import com.nexdom.test_spring_vue.repository.ProdutoRepository;
 
@@ -65,5 +69,10 @@ public class ProdutoService {
     private Produto buscarEntidade(Long id) {
         return repository.findById(id)
                 .orElseThrow(() -> new ProdutoNaoEncontradoException(id));
+    }
+
+    @Transactional(readOnly = true)
+    public List<ProdutoPorTipoResponse> consultarPorTipo(TipoProduto tipo) {
+        return repository.consultarPorTipo(tipo);
     }
 }
