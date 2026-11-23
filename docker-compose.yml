@@ -3,6 +3,12 @@ services:
     build: ./backend
     ports:
       - "8080:8080"
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
   tests:
     image: maven:3.9-eclipse-temurin-21
     working_dir: /app
