@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.nexdom.test_spring_vue.dto.LucroProdutoResponse;
+import com.nexdom.test_spring_vue.dto.MovimentacaoRequest;
 import com.nexdom.test_spring_vue.dto.ProdutoPorTipoResponse;
 import com.nexdom.test_spring_vue.dto.ProdutoRequest;
 import com.nexdom.test_spring_vue.dto.ProdutoResponse;
@@ -15,6 +16,7 @@ import com.nexdom.test_spring_vue.exception.ProdutoComMovimentacaoException;
 import com.nexdom.test_spring_vue.exception.ProdutoNaoEncontradoException;
 import com.nexdom.test_spring_vue.mapper.ProdutoMapper;
 import com.nexdom.test_spring_vue.model.Produto;
+import com.nexdom.test_spring_vue.model.TipoMovimentacao;
 import com.nexdom.test_spring_vue.model.TipoProduto;
 import com.nexdom.test_spring_vue.repository.MovimentoEstoqueRepository;
 import com.nexdom.test_spring_vue.repository.ProdutoRepository;
@@ -28,6 +30,7 @@ public class ProdutoService {
     private final ProdutoRepository repository;
     private final MovimentoEstoqueRepository movimentoRepository;
     private final ProdutoMapper mapper;
+    private final MovimentoEstoqueService movimentoService;
 
     @Transactional
     public ProdutoResponse criar(ProdutoRequest request) {
@@ -35,6 +38,10 @@ public class ProdutoService {
             throw new CodigoDuplicadoException(request.codigo());
         }
         Produto salvo = repository.save(mapper.toEntity(request));
+        if (request.quantidadeInicial() != null && request.quantidadeInicial() > 0) {
+            movimentoService.registrar(new MovimentacaoRequest(
+                    salvo.getId(), TipoMovimentacao.ENTRADA, request.quantidadeInicial(), null));
+        }
         return mapper.toResponse(salvo);
     }
 

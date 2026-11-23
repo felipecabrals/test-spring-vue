@@ -1,4 +1,4 @@
-import type { TipoProduto } from '@/types/api'
+import type { TipoMovimentacao, TipoProduto } from '@/types/api'
 
 export const TIPOS_PRODUTO: { value: TipoProduto; label: string }[] = [
   { value: 'ELETRONICO', label: 'Eletrônico' },
@@ -12,3 +12,11 @@ export const TIPOS_PRODUTO: { value: TipoProduto; label: string }[] = [
 
 export const rotuloTipo = (tipo: TipoProduto) =>
   TIPOS_PRODUTO.find((t) => t.value === tipo)?.label ?? tipo
+
+export const TIPOS_MOVIMENTACAO: { value: TipoMovimentacao; label: string }[] = [
+  { value: 'ENTRADA', label: 'Entrada' },
+  { value: 'SAIDA', label: 'Saída' },
+]
+
+export const rotuloMovimentacao = (tipo: TipoMovimentacao) =>
+  TIPOS_MOVIMENTACAO.find((t) => t.value === tipo)?.label ?? tipo

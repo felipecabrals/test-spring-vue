@@ -13,6 +13,7 @@ const vazio = (): ProdutoRequest => ({
     descricao: '',
     tipo: 'ELETRONICO',
     valorFornecedor: 0,
+    quantidadeInicial: 0,
 })
 
 const form = reactive<ProdutoRequest>(vazio())
@@ -31,6 +32,7 @@ watch(
                     descricao: produto.descricao,
                     tipo: produto.tipo,
                     valorFornecedor: produto.valorFornecedor,
+                    quantidadeInicial: 0,
                 }
                 : vazio(),
         )
@@ -79,6 +81,9 @@ async function salvar() {
         </label>
         <label>Valor no fornecedor
             <input v-model.number="form.valorFornecedor" type="number" min="0.01" step="0.01" required />
+        </label>
+        <label v-if="!produto">Estoque inicial
+            <input v-model.number="form.quantidadeInicial" type="number" min="0" step="1" />
         </label>
 
         <p v-if="erro" class="erro">{{ erro }}</p>

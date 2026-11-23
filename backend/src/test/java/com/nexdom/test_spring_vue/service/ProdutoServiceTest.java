@@ -17,6 +17,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.nexdom.test_spring_vue.dto.MovimentacaoRequest;
 import com.nexdom.test_spring_vue.dto.ProdutoRequest;
 import com.nexdom.test_spring_vue.dto.ProdutoResponse;
 import com.nexdom.test_spring_vue.exception.CodigoDuplicadoException;
@@ -24,6 +25,7 @@ import com.nexdom.test_spring_vue.exception.ProdutoComMovimentacaoException;
 import com.nexdom.test_spring_vue.exception.ProdutoNaoEncontradoException;
 import com.nexdom.test_spring_vue.mapper.ProdutoMapper;
 import com.nexdom.test_spring_vue.model.Produto;
+import com.nexdom.test_spring_vue.model.TipoMovimentacao;
 import com.nexdom.test_spring_vue.model.TipoProduto;
 import com.nexdom.test_spring_vue.repository.MovimentoEstoqueRepository;
 import com.nexdom.test_spring_vue.repository.ProdutoRepository;
@@ -37,13 +39,17 @@ public class ProdutoServiceTest {
 
     private ProdutoService service;
 
+    @Mock
+    private MovimentoEstoqueService movimentoService;
+
     @BeforeEach
     void setUp() {
-        service = new ProdutoService(repository, movimentoRepository, new ProdutoMapper());
+        service = new ProdutoService(
+                repository, movimentoRepository, new ProdutoMapper(), movimentoService);
     }
 
     private ProdutoRequest request(String codigo) {
-        return new ProdutoRequest(codigo, "Notebook", TipoProduto.ELETRONICO, new BigDecimal("3500.00"));
+        return new ProdutoRequest(codigo, "Notebook", TipoProduto.ELETRONICO, new BigDecimal("3500.00"), null);
     }
 
     private Produto produtoExistente() {
@@ -128,5 +134,21 @@ public class ProdutoServiceTest {
         service.excluir(1L);
 
         verify(repository).delete(produto);
+    }
+
+    @Test
+    void criarComEstoqueInicialDeveRegistrarEntrada() {
+        when(repository.existsByCodigo("P001")).thenReturn(false);
+        when(repository.save(any())).thenAnswer(inv -> {
+            Produto produto = inv.getArgument(0);
+            produto.setId(1L);
+            return produto;
+        });
+
+        service.criar(new ProdutoRequest(
+                "P001", "Notebook", TipoProduto.ELETRONICO, new BigDecimal("3500.00"), 10));
+
+        verify(movimentoService).registrar(
+                new MovimentacaoRequest(1L, TipoMovimentacao.ENTRADA, 10, null));
     }
 }

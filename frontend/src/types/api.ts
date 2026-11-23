@@ -35,4 +35,39 @@ export interface ProdutoRequest {
   descricao: string
   tipo: TipoProduto
   valorFornecedor: number
+  quantidadeInicial?: number
+}
+
+export interface Movimento {
+  id: number
+  produtoId: number
+  codigoProduto: string
+  tipo: TipoMovimentacao
+  quantidade: number
+  valorVenda: number | null
+  dataMovimentacao: string
+}
+
+export interface MovimentacaoRequest {
+  produtoId: number
+  tipo: TipoMovimentacao
+  quantidade: number
+  valorVenda: number | null
+}
+
+export interface ProdutoPorTipo {
+  id: number
+  codigo: string
+  descricao: string
+  tipo: TipoProduto
+  quantidadeSaida: number
+  quantidadeDisponivel: number
+}
+
+export interface LucroProduto {
+  id: number
+  codigo: string
+  descricao: string
+  quantidadeTotalSaida: number
+  lucroTotal: number
 }

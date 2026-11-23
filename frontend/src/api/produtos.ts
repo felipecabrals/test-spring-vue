@@ -13,4 +13,9 @@ export const produtosApi = {
     http.put<Produto>(`/produtos/${id}`, dados).then((r) => r.data),
 
   excluir: (id: number) => http.delete(`/produtos/${id}`).then(() => undefined),
+
+  listarTodos: () =>
+    http
+      .get<Page<Produto>>('/produtos', { params: { page: 0, size: 200, sort: 'descricao' } })
+      .then((r) => r.data.content),
 }
