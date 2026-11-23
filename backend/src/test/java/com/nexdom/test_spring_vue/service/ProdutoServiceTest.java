@@ -6,6 +6,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -23,6 +24,7 @@ import com.nexdom.test_spring_vue.dto.ProdutoResponse;
 import com.nexdom.test_spring_vue.exception.CodigoDuplicadoException;
 import com.nexdom.test_spring_vue.exception.ProdutoComMovimentacaoException;
 import com.nexdom.test_spring_vue.exception.ProdutoNaoEncontradoException;
+import com.nexdom.test_spring_vue.exception.RegraNegocioException;
 import com.nexdom.test_spring_vue.mapper.ProdutoMapper;
 import com.nexdom.test_spring_vue.model.Produto;
 import com.nexdom.test_spring_vue.model.TipoMovimentacao;
@@ -150,5 +152,12 @@ public class ProdutoServiceTest {
 
         verify(movimentoService).registrar(
                 new MovimentacaoRequest(1L, TipoMovimentacao.ENTRADA, 10, null));
+    }
+
+    @Test
+    void periodoComDataFinalAnteriorADataInicialDeveLancarExcecao() {
+        assertThatThrownBy(() -> service.resumirMovimentacao(
+                LocalDate.of(2026, 11, 10), LocalDate.of(2026, 11, 1)))
+                .isInstanceOf(RegraNegocioException.class);
     }
 }

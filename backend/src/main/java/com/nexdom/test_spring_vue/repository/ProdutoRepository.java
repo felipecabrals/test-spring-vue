@@ -1,5 +1,6 @@
 package com.nexdom.test_spring_vue.repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -8,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 
 import com.nexdom.test_spring_vue.dto.LucroProdutoResponse;
 import com.nexdom.test_spring_vue.dto.ProdutoPorTipoResponse;
+import com.nexdom.test_spring_vue.dto.ResumoMovimentacaoResponse;
 import com.nexdom.test_spring_vue.model.Produto;
 import com.nexdom.test_spring_vue.model.TipoProduto;
 
@@ -43,4 +45,23 @@ public interface ProdutoRepository extends JpaRepository<Produto, Long> {
             ORDER BY p.descricao
             """)
     List<LucroProdutoResponse> consultarLucro();
+
+    @Query("""
+            SELECT new com.nexdom.test_spring_vue.dto.ResumoMovimentacaoResponse(
+                p.id, p.codigo, p.descricao,
+                SUM(CASE WHEN m.tipo = com.nexdom.test_spring_vue.model.TipoMovimentacao.ENTRADA
+                         THEN m.quantidade ELSE 0 END),
+                SUM(CASE WHEN m.tipo = com.nexdom.test_spring_vue.model.TipoMovimentacao.SAIDA
+                         THEN m.quantidade ELSE 0 END),
+                p.quantidadeEstoque)
+            FROM Produto p
+            LEFT JOIN MovimentoEstoque m
+                   ON m.produto = p
+                  AND (:inicio IS NULL OR m.dataMovimentacao >= :inicio)
+                  AND (:fim IS NULL OR m.dataMovimentacao < :fim)
+            GROUP BY p.id, p.codigo, p.descricao, p.quantidadeEstoque
+            ORDER BY p.descricao
+            """)
+    List<ResumoMovimentacaoResponse> resumirMovimentacao(
+            @Param("inicio") LocalDateTime inicio, @Param("fim") LocalDateTime fim);
 }

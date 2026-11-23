@@ -1,5 +1,7 @@
 package com.nexdom.test_spring_vue.service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -11,9 +13,11 @@ import com.nexdom.test_spring_vue.dto.MovimentacaoRequest;
 import com.nexdom.test_spring_vue.dto.ProdutoPorTipoResponse;
 import com.nexdom.test_spring_vue.dto.ProdutoRequest;
 import com.nexdom.test_spring_vue.dto.ProdutoResponse;
+import com.nexdom.test_spring_vue.dto.ResumoMovimentacaoResponse;
 import com.nexdom.test_spring_vue.exception.CodigoDuplicadoException;
 import com.nexdom.test_spring_vue.exception.ProdutoComMovimentacaoException;
 import com.nexdom.test_spring_vue.exception.ProdutoNaoEncontradoException;
+import com.nexdom.test_spring_vue.exception.RegraNegocioException;
 import com.nexdom.test_spring_vue.mapper.ProdutoMapper;
 import com.nexdom.test_spring_vue.model.Produto;
 import com.nexdom.test_spring_vue.model.TipoMovimentacao;
@@ -87,5 +91,15 @@ public class ProdutoService {
     @Transactional(readOnly = true)
     public List<LucroProdutoResponse> consultarLucro() {
         return repository.consultarLucro();
+    }
+
+    @Transactional(readOnly = true)
+    public List<ResumoMovimentacaoResponse> resumirMovimentacao(LocalDate inicio, LocalDate fim) {
+        if (inicio != null && fim != null && fim.isBefore(inicio)) {
+            throw new RegraNegocioException("A data final não pode ser anterior à data inicial");
+        }
+        LocalDateTime de = inicio != null ? inicio.atStartOfDay() : null;
+        LocalDateTime ate = fim != null ? fim.plusDays(1).atStartOfDay() : null;
+        return repository.resumirMovimentacao(de, ate);
     }
 }

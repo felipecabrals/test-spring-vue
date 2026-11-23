@@ -5,6 +5,17 @@ import { produtosApi } from '@/api/produtos'
 import { TIPOS_PRODUTO } from '@/constants/tipos'
 import type { Produto, ProdutoRequest } from '@/types/api'
 
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select'
+
 const props = defineProps<{ produto: Produto | null }>()
 const emit = defineEmits<{ salvo: []; cancelar: [] }>()
 
@@ -67,61 +78,55 @@ async function salvar() {
 </script>
 
 <template>
-    <form class="form" @submit.prevent="salvar">
-        <h3>{{ produto ? 'Editar produto' : 'Novo produto' }}</h3>
+    <form class="grid gap-4" @submit.prevent="salvar">
+        <div class="grid gap-2">
+            <Label for="codigo">Código</Label>
+            <Input id="codigo" v-model="form.codigo" required />
+        </div>
 
-        <label>Código <input v-model="form.codigo" required /></label>
-        <label>Descrição <input v-model="form.descricao" required /></label>
-        <label>Tipo
-            <select v-model="form.tipo">
-                <option v-for="t in TIPOS_PRODUTO" :key="t.value" :value="t.value">
-                    {{ t.label }}
-                </option>
-            </select>
-        </label>
-        <label>Valor no fornecedor
-            <input v-model.number="form.valorFornecedor" type="number" min="0.01" step="0.01" required />
-        </label>
-        <label v-if="!produto">Estoque inicial
-            <input v-model.number="form.quantidadeInicial" type="number" min="0" step="1" />
-        </label>
+        <div class="grid gap-2">
+            <Label for="descricao">Descrição</Label>
+            <Input id="descricao" v-model="form.descricao" required />
+        </div>
 
-        <p v-if="erro" class="erro">{{ erro }}</p>
-        <ul v-if="detalhes.length" class="erro">
-            <li v-for="d in detalhes" :key="d">{{ d }}</li>
-        </ul>
+        <div class="grid gap-2">
+            <Label>Tipo</Label>
+            <Select v-model="form.tipo">
+                <SelectTrigger class="w-full">
+                    <SelectValue placeholder="Selecione o tipo" />
+                </SelectTrigger>
+                <SelectContent>
+                    <SelectItem v-for="t in TIPOS_PRODUTO" :key="t.value" :value="t.value">
+                        {{ t.label }}
+                    </SelectItem>
+                </SelectContent>
+            </Select>
+        </div>
 
-        <div class="acoes">
-            <button type="submit" :disabled="salvando">
-                {{ salvando ? 'Salvando...' : 'Salvar' }}
-            </button>
-            <button type="button" @click="emit('cancelar')">Cancelar</button>
+        <div class="grid gap-2">
+            <Label for="valor">Valor no fornecedor</Label>
+            <Input id="valor" type="number" step="0.01" min="0" :model-value="form.valorFornecedor"
+                @update:model-value="(v) => (form.valorFornecedor = Number(v))" />
+        </div>
+
+        <div v-if="!produto" class="grid gap-2">
+            <Label for="estoque">Estoque inicial</Label>
+            <Input id="estoque" type="number" min="0" :model-value="form.quantidadeInicial"
+                @update:model-value="(v) => (form.quantidadeInicial = Number(v))" />
+        </div>
+
+        <div v-if="erro" class="text-sm text-destructive">
+            <p>{{ erro }}</p>
+            <ul v-if="detalhes.length" class="list-disc pl-4">
+                <li v-for="d in detalhes" :key="d">{{ d }}</li>
+            </ul>
+        </div>
+
+        <div class="flex gap-2">
+            <Button type="submit" :disabled="salvando">Salvar</Button>
+            <Button type="button" variant="outline" @click="$emit('cancelar')">
+                Cancelar
+            </Button>
         </div>
     </form>
 </template>
-
-<style scoped>
-.form {
-    display: grid;
-    gap: 12px;
-    max-width: 420px;
-    margin: 16px 0;
-    padding: 16px;
-    border: 1px solid #e5e7eb;
-    border-radius: 8px;
-}
-
-label {
-    display: grid;
-    gap: 4px;
-}
-
-.acoes {
-    display: flex;
-    gap: 8px;
-}
-
-.erro {
-    color: #b91c1c;
-}
-</style>

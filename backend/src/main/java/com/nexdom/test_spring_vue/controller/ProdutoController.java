@@ -1,10 +1,12 @@
 package com.nexdom.test_spring_vue.controller;
 
 import java.net.URI;
+import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -22,6 +24,7 @@ import com.nexdom.test_spring_vue.dto.LucroProdutoResponse;
 import com.nexdom.test_spring_vue.dto.ProdutoPorTipoResponse;
 import com.nexdom.test_spring_vue.dto.ProdutoRequest;
 import com.nexdom.test_spring_vue.dto.ProdutoResponse;
+import com.nexdom.test_spring_vue.dto.ResumoMovimentacaoResponse;
 import com.nexdom.test_spring_vue.model.TipoProduto;
 import com.nexdom.test_spring_vue.service.ProdutoService;
 
@@ -71,5 +74,12 @@ public class ProdutoController {
     @GetMapping("/lucro")
     public List<LucroProdutoResponse> consultarLucro() {
         return service.consultarLucro();
+    }
+
+    @GetMapping("/movimentacao")
+    public List<ResumoMovimentacaoResponse> resumirMovimentacao(
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate inicio,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fim) {
+        return service.resumirMovimentacao(inicio, fim);
     }
 }

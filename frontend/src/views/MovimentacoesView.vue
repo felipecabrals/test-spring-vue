@@ -7,6 +7,16 @@ import MovimentacaoForm from '@/components/MovimentacaoForm.vue'
 import { rotuloMovimentacao } from '@/constants/tipos'
 import type { Movimento, Page, Produto } from '@/types/api'
 import { formatarDataHora, formatarMoeda } from '@/utils/formato'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from '@/components/ui/table'
 
 const produtos = ref<Produto[]>([])
 const pagina = ref<Page<Movimento> | null>(null)
@@ -41,69 +51,56 @@ onMounted(carregar)
 </script>
 
 <template>
-    <section>
-        <h2>Movimentações</h2>
+    <section class="grid gap-4">
+        <h2 class="text-2xl font-semibold tracking-tight">Movimentações</h2>
 
-        <p v-if="erro" class="erro">{{ erro }}</p>
+        <p v-if="erro" class="text-sm text-destructive">{{ erro }}</p>
 
-        <MovimentacaoForm :produtos="produtos" @registrada="aoRegistrar" />
+        <Card>
+            <CardHeader>
+                <CardTitle>Registrar movimentação</CardTitle>
+            </CardHeader>
+            <CardContent>
+                <MovimentacaoForm :produtos="produtos" @registrada="aoRegistrar" />
+            </CardContent>
+        </Card>
 
-        <h3>Histórico</h3>
-        <table v-if="pagina && pagina.content.length">
-            <thead>
-                <tr>
-                    <th>Data</th>
-                    <th>Produto</th>
-                    <th>Tipo</th>
-                    <th>Quantidade</th>
-                    <th>Valor de venda</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr v-for="m in pagina.content" :key="m.id">
-                    <td>{{ formatarDataHora(m.dataMovimentacao) }}</td>
-                    <td>{{ m.codigoProduto }}</td>
-                    <td>{{ rotuloMovimentacao(m.tipo) }}</td>
-                    <td>{{ m.quantidade }}</td>
-                    <td>{{ m.valorVenda === null ? '-' : formatarMoeda(m.valorVenda) }}</td>
-                </tr>
-            </tbody>
-        </table>
+        <h3 class="text-xl font-semibold tracking-tight">Histórico</h3>
+
+        <Card v-if="pagina && pagina.content.length">
+            <CardContent>
+                <Table>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead>Data</TableHead>
+                            <TableHead>Produto</TableHead>
+                            <TableHead>Tipo</TableHead>
+                            <TableHead>Quantidade</TableHead>
+                            <TableHead>Valor de venda</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        <TableRow v-for="m in pagina.content" :key="m.id">
+                            <TableCell>{{ formatarDataHora(m.dataMovimentacao) }}</TableCell>
+                            <TableCell>{{ m.codigoProduto }}</TableCell>
+                            <TableCell>{{ rotuloMovimentacao(m.tipo) }}</TableCell>
+                            <TableCell>{{ m.quantidade }}</TableCell>
+                            <TableCell>{{ m.valorVenda === null ? '-' : formatarMoeda(m.valorVenda) }}</TableCell>
+                        </TableRow>
+                    </TableBody>
+                </Table>
+            </CardContent>
+        </Card>
         <p v-else-if="pagina">Nenhuma movimentação registrada.</p>
 
-        <div v-if="pagina && pagina.totalPages > 1" class="paginacao">
-            <button type="button" :disabled="pagina.first" @click="irParaPagina(numeroPagina - 1)">
+        <div v-if="pagina && pagina.totalPages > 1" class="flex items-center gap-3">
+            <Button type="button" variant="outline" size="sm" :disabled="pagina.first" @click="irParaPagina(numeroPagina - 1)">
                 Anterior
-            </button>
-            <span>Página {{ pagina.number + 1 }} de {{ pagina.totalPages }}</span>
-            <button type="button" :disabled="pagina.last" @click="irParaPagina(numeroPagina + 1)">
+            </Button>
+            <span class="text-sm text-muted-foreground">Página {{ pagina.number + 1 }} de {{ pagina.totalPages }}</span>
+            <Button type="button" variant="outline" size="sm" :disabled="pagina.last" @click="irParaPagina(numeroPagina + 1)">
                 Próxima
-            </button>
+            </Button>
         </div>
     </section>
 </template>
-
-<style scoped>
-table {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-th,
-td {
-    text-align: left;
-    padding: 8px;
-    border-bottom: 1px solid #e5e7eb;
-}
-
-.paginacao {
-    display: flex;
-    gap: 12px;
-    align-items: center;
-    margin-top: 16px;
-}
-
-.erro {
-    color: #b91c1c;
-}
-</style>

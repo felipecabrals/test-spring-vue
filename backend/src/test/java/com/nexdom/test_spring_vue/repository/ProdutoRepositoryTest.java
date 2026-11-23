@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.nexdom.test_spring_vue.dto.LucroProdutoResponse;
 import com.nexdom.test_spring_vue.dto.ProdutoPorTipoResponse;
+import com.nexdom.test_spring_vue.dto.ResumoMovimentacaoResponse;
 import com.nexdom.test_spring_vue.model.MovimentoEstoque;
 import com.nexdom.test_spring_vue.model.Produto;
 import com.nexdom.test_spring_vue.model.TipoMovimentacao;
@@ -96,5 +97,31 @@ public class ProdutoRepositoryTest {
         assertThat(resultado).hasSize(1);
         assertThat(resultado.get(0).quantidadeTotalSaida()).isZero();
         assertThat(resultado.get(0).lucroTotal()).isEqualByComparingTo("0");
+    }
+
+    @Test
+    void deveResumirEntradasESaidasPorProduto() {
+        Produto notebook = salvarProduto("P001", "Notebook", TipoProduto.ELETRONICO, 7);
+        movimentoRepository.save(movimento(notebook, TipoMovimentacao.ENTRADA, 10));
+        movimentoRepository.save(movimento(notebook, TipoMovimentacao.SAIDA, 3));
+
+        List<ResumoMovimentacaoResponse> resultado = produtoRepository.resumirMovimentacao(null, null);
+
+        assertThat(resultado).hasSize(1);
+        assertThat(resultado.get(0).totalEntrada()).isEqualTo(10L);
+        assertThat(resultado.get(0).totalSaida()).isEqualTo(3L);
+        assertThat(resultado.get(0).saldoAtual()).isEqualTo(7);
+    }
+
+    @Test
+    void movimentosForaDoPeriodoNaoDevemSerContados() {
+        Produto notebook = salvarProduto("P001", "Notebook", TipoProduto.ELETRONICO, 7);
+        movimentoRepository.save(movimento(notebook, TipoMovimentacao.ENTRADA, 10));
+
+        List<ResumoMovimentacaoResponse> resultado = produtoRepository
+                .resumirMovimentacao(LocalDateTime.now().plusDays(1), null);
+
+        assertThat(resultado).hasSize(1);
+        assertThat(resultado.get(0).totalEntrada()).isZero();
     }
 }

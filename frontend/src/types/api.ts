@@ -71,3 +71,12 @@ export interface LucroProduto {
   quantidadeTotalSaida: number
   lucroTotal: number
 }
+
+export interface ResumoMovimentacao {
+  id: number
+  codigo: string
+  descricao: string
+  totalEntrada: number
+  totalSaida: number
+  saldoAtual: number
+}

@@ -6,6 +6,16 @@ import ProdutoForm from '@/components/ProdutoForm.vue'
 import { rotuloTipo } from '@/constants/tipos'
 import type { Page, Produto } from '@/types/api'
 import { formatarMoeda } from '@/utils/formato'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from '@/components/ui/table'
 
 const pagina = ref<Page<Produto> | null>(null)
 const numeroPagina = ref(0)
@@ -59,88 +69,66 @@ onMounted(carregar)
 </script>
 
 <template>
-    <section>
-        <div class="cabecalho">
-            <h2>Produtos</h2>
-            <button type="button" @click="novo">Novo produto</button>
+    <section class="grid gap-4">
+        <div class="flex items-center justify-between">
+            <h2 class="text-2xl font-semibold tracking-tight">Produtos</h2>
+            <Button type="button" @click="novo">Novo produto</Button>
         </div>
 
-        <p v-if="erro" class="erro">{{ erro }}</p>
+        <p v-if="erro" class="text-sm text-destructive">{{ erro }}</p>
 
-        <ProdutoForm v-if="formAberto" :produto="emEdicao" @salvo="aoSalvar" @cancelar="formAberto = false" />
+        <Card v-if="formAberto">
+            <CardHeader>
+                <CardTitle>{{ emEdicao ? 'Editar produto' : 'Novo produto' }}</CardTitle>
+            </CardHeader>
+            <CardContent>
+                <ProdutoForm :produto="emEdicao" @salvo="aoSalvar" @cancelar="formAberto = false" />
+            </CardContent>
+        </Card>
 
-        <table v-if="pagina && pagina.content.length">
-            <thead>
-                <tr>
-                    <th>Código</th>
-                    <th>Descrição</th>
-                    <th>Tipo</th>
-                    <th>Valor fornecedor</th>
-                    <th>Estoque</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr v-for="p in pagina.content" :key="p.id">
-                    <td>{{ p.codigo }}</td>
-                    <td>{{ p.descricao }}</td>
-                    <td>{{ rotuloTipo(p.tipo) }}</td>
-                    <td>{{ formatarMoeda(p.valorFornecedor) }}</td>
-                    <td>{{ p.quantidadeEstoque }}</td>
-                    <td class="acoes">
-                        <button type="button" @click="editar(p)">Editar</button>
-                        <button type="button" @click="excluir(p)">Excluir</button>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+        <Card v-if="pagina && pagina.content.length">
+            <CardContent>
+                <Table>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead>Código</TableHead>
+                            <TableHead>Descrição</TableHead>
+                            <TableHead>Tipo</TableHead>
+                            <TableHead>Valor fornecedor</TableHead>
+                            <TableHead>Estoque</TableHead>
+                            <TableHead></TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        <TableRow v-for="p in pagina.content" :key="p.id">
+                            <TableCell>{{ p.codigo }}</TableCell>
+                            <TableCell>{{ p.descricao }}</TableCell>
+                            <TableCell>{{ rotuloTipo(p.tipo) }}</TableCell>
+                            <TableCell>{{ formatarMoeda(p.valorFornecedor) }}</TableCell>
+                            <TableCell>{{ p.quantidadeEstoque }}</TableCell>
+                            <TableCell class="flex gap-2">
+                                <Button type="button" variant="outline" size="sm" @click="editar(p)">
+                                    Editar
+                                </Button>
+                                <Button type="button" variant="destructive" size="sm" @click="excluir(p)">
+                                    Excluir
+                                </Button>
+                            </TableCell>
+                        </TableRow>
+                    </TableBody>
+                </Table>
+            </CardContent>
+        </Card>
         <p v-else-if="pagina">Nenhum produto cadastrado.</p>
 
-        <div v-if="pagina && pagina.totalPages > 1" class="paginacao">
-            <button type="button" :disabled="pagina.first" @click="irParaPagina(numeroPagina - 1)">
+        <div v-if="pagina && pagina.totalPages > 1" class="flex items-center gap-3">
+            <Button type="button" variant="outline" size="sm" :disabled="pagina.first" @click="irParaPagina(numeroPagina - 1)">
                 Anterior
-            </button>
-            <span>Página {{ pagina.number + 1 }} de {{ pagina.totalPages }}</span>
-            <button type="button" :disabled="pagina.last" @click="irParaPagina(numeroPagina + 1)">
+            </Button>
+            <span class="text-sm text-muted-foreground">Página {{ pagina.number + 1 }} de {{ pagina.totalPages }}</span>
+            <Button type="button" variant="outline" size="sm" :disabled="pagina.last" @click="irParaPagina(numeroPagina + 1)">
                 Próxima
-            </button>
+            </Button>
         </div>
     </section>
 </template>
-
-<style scoped>
-.cabecalho {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 16px;
-}
-
-th,
-td {
-    text-align: left;
-    padding: 8px;
-    border-bottom: 1px solid #e5e7eb;
-}
-
-.acoes {
-    display: flex;
-    gap: 8px;
-}
-
-.paginacao {
-    display: flex;
-    gap: 12px;
-    align-items: center;
-    margin-top: 16px;
-}
-
-.erro {
-    color: #b91c1c;
-}
-</style>

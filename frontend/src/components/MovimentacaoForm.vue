@@ -4,6 +4,16 @@ import { ApiException } from '@/api/http'
 import { movimentosApi } from '@/api/movimentos'
 import { TIPOS_MOVIMENTACAO } from '@/constants/tipos'
 import type { Produto, TipoMovimentacao } from '@/types/api'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select'
 
 defineProps<{ produtos: Produto[] }>()
 const emit = defineEmits<{ registrada: [] }>()
@@ -59,67 +69,55 @@ async function registrar() {
 </script>
 
 <template>
-    <form class="form" @submit.prevent="registrar">
-        <h3>Registrar movimentação</h3>
+    <form class="grid gap-4" @submit.prevent="registrar">
+        <div class="grid gap-2">
+            <Label>Produto</Label>
+            <Select v-model="form.produtoId">
+                <SelectTrigger class="w-full">
+                    <SelectValue placeholder="Selecione..." />
+                </SelectTrigger>
+                <SelectContent>
+                    <SelectItem v-for="p in produtos" :key="p.id" :value="p.id">
+                        {{ p.codigo }} - {{ p.descricao }} (saldo: {{ p.quantidadeEstoque }})
+                    </SelectItem>
+                </SelectContent>
+            </Select>
+        </div>
 
-        <label>Produto
-            <select v-model="form.produtoId" required>
-                <option :value="null" disabled>Selecione...</option>
-                <option v-for="p in produtos" :key="p.id" :value="p.id">
-                    {{ p.codigo }} - {{ p.descricao }} (saldo: {{ p.quantidadeEstoque }})
-                </option>
-            </select>
-        </label>
+        <div class="grid gap-2">
+            <Label>Tipo</Label>
+            <Select v-model="form.tipo">
+                <SelectTrigger class="w-full">
+                    <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                    <SelectItem v-for="t in TIPOS_MOVIMENTACAO" :key="t.value" :value="t.value">
+                        {{ t.label }}
+                    </SelectItem>
+                </SelectContent>
+            </Select>
+        </div>
 
-        <label>Tipo
-            <select v-model="form.tipo">
-                <option v-for="t in TIPOS_MOVIMENTACAO" :key="t.value" :value="t.value">
-                    {{ t.label }}
-                </option>
-            </select>
-        </label>
+        <div class="grid gap-2">
+            <Label for="quantidade">Quantidade</Label>
+            <Input id="quantidade" v-model.number="form.quantidade" type="number" min="1" step="1" required />
+        </div>
 
-        <label>Quantidade
-            <input v-model.number="form.quantidade" type="number" min="1" step="1" required />
-        </label>
+        <div v-if="ehSaida" class="grid gap-2">
+            <Label for="valorVenda">Valor de venda (unitário)</Label>
+            <Input id="valorVenda" v-model.number="form.valorVenda" type="number" min="0.01" step="0.01" required />
+        </div>
 
-        <label v-if="ehSaida">Valor de venda (unitário)
-            <input v-model.number="form.valorVenda" type="number" min="0.01" step="0.01" required />
-        </label>
+        <p v-if="sucesso" class="text-sm text-green-600">{{ sucesso }}</p>
+        <div v-if="erro" class="text-sm text-destructive">
+            <p>{{ erro }}</p>
+            <ul v-if="detalhes.length" class="list-disc pl-4">
+                <li v-for="d in detalhes" :key="d">{{ d }}</li>
+            </ul>
+        </div>
 
-        <p v-if="sucesso" class="sucesso">{{ sucesso }}</p>
-        <p v-if="erro" class="erro">{{ erro }}</p>
-        <ul v-if="detalhes.length" class="erro">
-            <li v-for="d in detalhes" :key="d">{{ d }}</li>
-        </ul>
-
-        <button type="submit" :disabled="enviando">
+        <Button type="submit" :disabled="enviando">
             {{ enviando ? 'Registrando...' : 'Registrar' }}
-        </button>
+        </Button>
     </form>
 </template>
-
-<style scoped>
-.form {
-    display: grid;
-    gap: 12px;
-    max-width: 420px;
-    margin: 16px 0;
-    padding: 16px;
-    border: 1px solid #e5e7eb;
-    border-radius: 8px;
-}
-
-label {
-    display: grid;
-    gap: 4px;
-}
-
-.erro {
-    color: #b91c1c;
-}
-
-.sucesso {
-    color: #15803d;
-}
-</style>
